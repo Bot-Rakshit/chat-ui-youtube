@@ -40,7 +40,7 @@ interface ChatItem {
 }
 
 export default function App() {
-  const [streamUrl, setStreamUrl] = useState('');
+  const [channelId, setChannelId] = useState('');
   const [comments, setComments] = useState<ChatItem[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,12 +70,11 @@ export default function App() {
       setComments([]);
       setError(null);
     } else {
-      const liveId = extractLiveId(streamUrl);
-      if (liveId) {
+      if (channelId) {
         try {
-          liveChat.current = new LiveChat({ liveId });
+          liveChat.current = new LiveChat({ channelId });
           await liveChat.current.start();
-          console.log('LiveChat started successfully for video ID:', liveId);
+          console.log('LiveChat started successfully for channel ID:', channelId);
           setIsConnected(true);
           setError(null);
 
@@ -93,15 +92,9 @@ export default function App() {
           setError(`Failed to connect. Error: ${(error as Error).message || 'Unknown error'}`);
         }
       } else {
-        setError('Invalid YouTube URL. Please enter a valid YouTube video or live stream URL.');
+        setError('Please enter a valid YouTube channel ID.');
       }
     }
-  };
-
-  const extractLiveId = (url: string) => {
-    const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
   };
 
   return (
@@ -111,9 +104,9 @@ export default function App() {
         <div className="flex mb-4 space-x-4">
           <Input
             type="text"
-            value={streamUrl}
-            onChange={(e) => setStreamUrl(e.target.value)}
-            placeholder="Enter YouTube live stream URL"
+            value={channelId}
+            onChange={(e) => setChannelId(e.target.value)}
+            placeholder="Enter YouTube channel ID"
             className="flex-1 bg-gray-800 text-white border-neon-green"
           />
           <Button
@@ -192,7 +185,7 @@ export default function App() {
           </AnimatePresence>
         </div>
         <div className="mt-4 flex justify-between items-center text-sm text-gray-400">
-          <span>Connected to: {isConnected ? streamUrl : 'Not connected'}</span>
+          <span>Connected to channel: {isConnected ? channelId : 'Not connected'}</span>
           <span>Messages: {comments.length}</span>
         </div>
       </div>
